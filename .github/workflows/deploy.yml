@@ -55,4 +55,11 @@ jobs:
           docker rm -f deploy-app || true
 
           echo "Subindo novo container..."
-          docker run -d --name deploy-app -p 8110:3000 $DOCKER_IMAGE
+          docker run -d --name deploy-app -p 8110:3000 \
+            -e DB_NAME=trabalho \
+            -e DB_USER=root \
+            -e DB_PASSWORD= \
+            -e DB_HOST=localhost \
+            -e DB_PORT=27906 \
+            -e PORT=3000 \
+            $DOCKER_IMAGE
