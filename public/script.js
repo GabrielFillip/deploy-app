@@ -2,7 +2,7 @@ const API_URL = "http://localhost:3000/users";
 
 // Carregar usuários na tabela
 if (document.getElementById("user-table-body")) {
-    fetch(API_URL)
+    fetch('/users')
     .then(res => res.json())
     .then(data => {
     const tbody = document.getElementById("user-table-body");
@@ -30,7 +30,7 @@ if (addForm) {
     const formData = new FormData(addForm);
     const user = Object.fromEntries(formData.entries());
 
-    fetch(API_URL, {
+    fetch('/users', {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(user),
@@ -43,7 +43,7 @@ if (window.location.pathname.includes("edit.html")) {
     const params = new URLSearchParams(window.location.search);
     const id = params.get("id");
 
-    fetch(`${API_URL}/${id}`)
+    fetch('/users/' + id)
     .then(res => res.json())
     .then(user => {
         document.getElementById("user-id").value = user.id;
@@ -57,7 +57,7 @@ if (window.location.pathname.includes("edit.html")) {
     const formData = new FormData(editForm);
     const user = Object.fromEntries(formData.entries());
 
-    fetch(`${API_URL}/${user.id}`, {
+    fetch('/users/' + user.id, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(user),
@@ -67,6 +67,6 @@ if (window.location.pathname.includes("edit.html")) {
 
 // Deletar usuário
 function deleteUser(id) {
-    fetch(`${API_URL}/${id}`, { method: "DELETE" })
+    fetch('/users/' + id, { method: "DELETE" })
     .then(() => location.reload());
 }

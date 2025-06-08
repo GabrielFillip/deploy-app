@@ -1,0 +1,57 @@
+name: Deploy da Aplicação
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    env:
+      DOCKER_IMAGE: gabrielfillip/deploy-app
+
+    steps:
+    - name: Checkout do código
+      uses: actions/checkout@v3
+
+    - name: Login no Docker Hub
+      run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
+
+    - name: Build da imagem
+      run: docker build -t $DOCKER_IMAGE .
+
+    - name: Push da imagem para o Docker Hub
+      run: docker push $DOCKER_IMAGE
+
+    - name: Acessar servidor remoto e rodar Sonar + Deploy
+      uses: appleboy/ssh-action@v0.1.10
+      with:
+        host: 201.23.3.86
+        username: aluno
+        key: ${{ secrets.SSH_PRIVATE_KEY }}
+        script: |
+          echo "Pull da imagem mais recente..."
+          docker pull $DOCKER_IMAGE
+
+          echo "Subindo SonarQube temporariamente..."
+          docker run -d --name sonar -p 8110:9000 sonarqube:community
+          sleep 40
+
+          echo "Rodando análise com sonar-scanner..."
+          docker run --rm \
+            -e SONAR_HOST_URL="http://localhost:9000" \
+            -e SONAR_LOGIN="${{ secrets.SONAR_TOKEN }}" \
+            -v ${{ github.workspace }}:/usr/src \
+            sonarsource/sonar-scanner-cli
+
+          echo "Removendo SonarQube..."
+          docker stop sonar
+          docker rm sonar
+
+          echo "Se passou, removendo container antigo..."
+          docker rm -f deploy-app || true
+
+          echo "Subindo novo container..."
+          docker run -d --name deploy-app -p 8110:3000 $DOCKER_IMAGE
