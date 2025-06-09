@@ -36,12 +36,11 @@ jobs:
           echo "Pull da imagem mais recente..."
           docker pull $DOCKER_IMAGE
 
-          echo "Parando possíveis containers SonarQube antigos..."
-          docker stop sonar || true
-          docker rm sonar || true
+          echo "Criando rede Docker para SonarQube..."
+          docker network create sonar-net || true
 
           echo "Subindo SonarQube temporariamente..."
-          docker run -d --name sonar -p 8110:9000 sonarqube:community
+          docker run -d --name sonar --network sonar-net -p 8110:9000 sonarqube:community
 
           echo "Aguardando SonarQube iniciar..."
           for i in {1..60}; do
@@ -61,7 +60,8 @@ jobs:
 
           echo "Rodando análise com sonar-scanner..."
           docker run --rm \
-            -e SONAR_HOST_URL="http://127.0.0.1:8110" \
+            --network sonar-net \
+            -e SONAR_HOST_URL="http://sonar:9000" \
             -e SONAR_LOGIN="${{ secrets.SONAR_TOKEN }}" \
             -v ${{ github.workspace }}:/usr/src \
             sonarsource/sonar-scanner-cli
