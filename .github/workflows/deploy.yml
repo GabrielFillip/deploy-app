@@ -36,15 +36,21 @@ jobs:
           echo "Pull da imagem mais recente..."
           docker pull $DOCKER_IMAGE
 
+          echo "Parando possíveis containers SonarQube antigos..."
+          docker stop sonar || true
+          docker rm sonar || true
+
           echo "Subindo SonarQube temporariamente..."
           docker run -d --name sonar -p 8110:9000 sonarqube:community
+
           echo "Aguardando SonarQube iniciar..."
-          for i in {1..30}; do
+          for i in {1..60}; do
+            curl -s http://localhost:8110/api/system/health || true
             if curl -s http://localhost:8110/api/system/health | grep -q '"status":"UP"'; then
               echo "SonarQube está pronto!"
               break
             fi
-            echo "Aguardando SonarQube... ($i/30)"
+            echo "Aguardando SonarQube... ($i/60)"
             sleep 5
           done
 
