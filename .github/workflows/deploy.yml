@@ -55,9 +55,13 @@ jobs:
             sleep 5
           done
 
+          echo "Status do container SonarQube antes do sonar-scanner:"
+          docker ps -a | grep sonar
+          docker logs sonar | tail -30
+
           echo "Rodando análise com sonar-scanner..."
           docker run --rm \
-            -e SONAR_HOST_URL="http://localhost:8110" \
+            -e SONAR_HOST_URL="http://127.0.0.1:8110" \
             -e SONAR_LOGIN="${{ secrets.SONAR_TOKEN }}" \
             -v ${{ github.workspace }}:/usr/src \
             sonarsource/sonar-scanner-cli
