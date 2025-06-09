@@ -60,6 +60,6 @@ jobs:
             -e DB_USER=appuser \
             -e DB_PASSWORD=appsenha \
             -e DB_HOST=127.0.0.1 \
-            -e DB_PORT=27906 \
+            -e DB_PORT=8111 \
             -e PORT=3000 \
             $DOCKER_IMAGE
