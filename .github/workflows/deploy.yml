@@ -57,8 +57,8 @@ jobs:
           echo "Subindo novo container..."
           docker run -d --name deploy-app --network host \
             -e DB_NAME=trabalho \
-            -e DB_USER=root \
-            -e DB_PASSWORD=sua_senha \
+            -e DB_USER=appuser \
+            -e DB_PASSWORD=appsenha \
             -e DB_HOST=127.0.0.1 \
             -e DB_PORT=27906 \
             -e PORT=3000 \
