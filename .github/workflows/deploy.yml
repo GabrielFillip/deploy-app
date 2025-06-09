@@ -45,8 +45,9 @@ jobs:
 
           echo "Aguardando SonarQube iniciar..."
           for i in {1..60}; do
-            curl -s http://localhost:8110/api/system/health || true
-            if curl -s http://localhost:8110/api/system/health | grep -q '"status":"UP"'; then
+            echo "Resposta do /api/server/version:";
+            curl -s http://localhost:8110/api/server/version || true
+            if curl -s http://localhost:8110/api/server/version | grep -E '^[0-9]'; then
               echo "SonarQube está pronto!"
               break
             fi
