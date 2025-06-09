@@ -21,8 +21,8 @@ services:
       - .:/app
     environment:
       - DB_NAME=trabalho
-      - DB_USER=root
-      - DB_PASSWORD=sua_senha
+      - DB_USER=appuser
+      - DB_PASSWORD=appsenha
       - DB_HOST=db
       - DB_PORT=3306
       - PORT=8110
