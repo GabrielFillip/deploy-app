@@ -38,7 +38,15 @@ jobs:
 
           echo "Subindo SonarQube temporariamente..."
           docker run -d --name sonar -p 8110:9000 sonarqube:community
-          sleep 40
+          echo "Aguardando SonarQube iniciar..."
+          for i in {1..30}; do
+            if curl -s http://localhost:8110/api/system/health | grep -q '"status":"UP"'; then
+              echo "SonarQube está pronto!"
+              break
+            fi
+            echo "Aguardando SonarQube... ($i/30)"
+            sleep 5
+          done
 
           echo "Rodando análise com sonar-scanner..."
           docker run --rm \
