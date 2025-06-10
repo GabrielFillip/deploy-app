@@ -39,6 +39,9 @@ jobs:
           echo "Criando rede Docker para SonarQube..."
           docker network create sonar-net || true
 
+          echo "Removendo SonarQube antigo..."
+          docker rm -f sonar || true
+
           echo "Subindo SonarQube temporariamente..."
           docker run -d --name sonar --network sonar-net -p 8114:9000 sonarqube:community
 
