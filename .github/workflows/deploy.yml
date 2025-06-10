@@ -95,11 +95,12 @@ jobs:
           # Cria rede se não existir
           docker network create $NETWORK_NAME || true
 
-          # Remove containers antigos
+          # Remove containers antigos, mas NÃO remove o volume do banco!
           docker stop $APP_CONTAINER || true && docker rm $APP_CONTAINER || true
           docker stop $DB_CONTAINER || true && docker rm $DB_CONTAINER || true
+          # NÃO adicione nenhum comando docker volume rm trabalho_db_data
 
-          # Sobe o banco
+          # Sobe o banco com volume persistente
           docker run -d --name $DB_CONTAINER --network $NETWORK_NAME --restart always \
             -e MYSQL_DATABASE=trabalho \
             -e MYSQL_USER=appuser \
