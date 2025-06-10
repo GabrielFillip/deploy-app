@@ -70,25 +70,17 @@ jobs:
         docker stop sonar
         docker rm sonar
 
-    - name: Acessar servidor remoto e rodar Deploy
+    - name: Acessar servidor remoto e rodar Deploy com Docker Compose
       uses: appleboy/ssh-action@v0.1.10
       with:
         host: 201.23.3.86
         username: aluno
         key: ${{ secrets.SSH_PRIVATE_KEY }}
-        envs: DOCKER_IMAGE
         script: |
-          echo "Pull da imagem mais recente..."
-          docker pull $DOCKER_IMAGE
-          echo "Se passou, removendo container antigo..."
-          docker rm -f deploy-app || true
-          echo "Subindo novo container..."
-          docker run -d --name deploy-app --network host \
-            -e DB_NAME=trabalho \
-            -e DB_USER=appuser \
-            -e DB_PASSWORD=appsenha \
-            -e DB_HOST=127.0.0.1 \
-            -e DB_PORT=8111 \
-            -e PORT=8112 \
-            -p 8112:8112 \
-            $DOCKER_IMAGE
+          cd /home/aluno/TrabalhoVolo # ajuste para o diretório correto do projeto no servidor
+          echo "Parando containers antigos..."
+          docker-compose down || true
+          echo "Subindo app e banco com Docker Compose..."
+          docker-compose up -d --build
+          echo "Containers em execução:"
+          docker ps
