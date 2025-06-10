@@ -40,13 +40,13 @@ jobs:
           docker network create sonar-net || true
 
           echo "Subindo SonarQube temporariamente..."
-          docker run -d --name sonar --network sonar-net -p 8006:8006 sonarqube:community -Dsonar.web.port=8006
+          docker run -d --name sonar --network sonar-net -p 8114:9000 sonarqube:community
 
           echo "Aguardando SonarQube iniciar..."
           for i in {1..60}; do
             echo "Resposta do /api/server/version:";
-            curl -s http://localhost:8006/api/server/version || true
-            if curl -s http://localhost:8006/api/server/version | grep -E '^[0-9]'; then
+            curl -s http://localhost:8114/api/server/version || true
+            if curl -s http://localhost:8114/api/server/version | grep -E '^[0-9]'; then
               echo "SonarQube está pronto!"
               break
             fi
@@ -61,7 +61,7 @@ jobs:
           echo "Rodando análise com sonar-scanner..."
           docker run --rm \
             --network sonar-net \
-            -e SONAR_HOST_URL="http://sonar:8006" \
+            -e SONAR_HOST_URL="http://sonar:9000" \
             -e SONAR_LOGIN="${{ secrets.SONAR_TOKEN }}" \
             -v ${{ github.workspace }}:/usr/src \
             sonarsource/sonar-scanner-cli
