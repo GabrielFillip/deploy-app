@@ -106,6 +106,7 @@ jobs:
             -e MYSQL_PASSWORD=appsenha \
             -e MYSQL_ROOT_PASSWORD=root \
             -p 8111:3306 \
+            -v trabalho_db_data:/var/lib/mysql \
             mysql:8
 
           echo "Aguardando o banco iniciar..."
