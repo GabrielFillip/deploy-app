@@ -51,7 +51,7 @@ jobs:
           sleep 2
         done
         echo "Gerando token SonarQube..."
-        SONAR_TOKEN=$(curl -s -u admin:admin -X POST "http://localhost:8114/api/user_tokens/generate?name=ci-token" | grep -oP '"token":"\K[^"']+')
+        SONAR_TOKEN=$(curl -s -u admin:admin -X POST "http://localhost:8114/api/user_tokens/generate?name=ci-token" | grep -oP '"token":"\K[^"]+')
         if [ -z "$SONAR_TOKEN" ]; then
           echo "Erro ao gerar token do SonarQube. Abortando pipeline."
           docker logs sonar | tail -50
