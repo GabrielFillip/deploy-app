@@ -60,6 +60,17 @@ jobs:
           docker ps -a | grep sonar
           docker logs sonar | tail -30
 
+          echo "Aguardando endpoint de autenticação do SonarQube..."
+          for i in {1..30}; do
+            STATUS=$(curl -s -o /dev/null -w "%{http_code}" -X POST -u admin:admin http://localhost:8114/api/authentication/login)
+            if [ "$STATUS" = "200" ]; then
+              echo "Endpoint de autenticação pronto!"
+              break
+            fi
+            echo "Aguardando autenticação... ($i/30)"
+            sleep 2
+          done
+
           echo "Gerando token SonarQube..."
           SONAR_TOKEN=$(curl -s -u admin:admin -X POST "http://localhost:8114/api/user_tokens/generate?name=ci-token" | grep -oP '"token":"\K[^"]+')
 
