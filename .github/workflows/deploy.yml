@@ -43,8 +43,7 @@ jobs:
           docker rm -f sonar || true
 
           echo "Subindo SonarQube temporariamente..."
-          docker run -d --name sonar -p 8114:9000 -v sonarqube_data:/opt/sonarqube/data sonarqube:community
-
+          docker run -d --name sonar --network sonar-net -p 8114:9000 -v sonarqube_data:/opt/sonarqube/data sonarqube:community
           echo "Aguardando SonarQube iniciar..."
           for i in {1..60}; do
             echo "Resposta do /api/server/version:";
