@@ -43,7 +43,7 @@ jobs:
           docker rm -f sonar || true
 
           echo "Subindo SonarQube temporariamente..."
-          docker run -d --name sonar --network sonar-net -p 8114:9000 -v sonarqube_data:/opt/sonarqube/data sonarqube:community
+          docker run -d --name sonar --network sonar-net -p 8114:9000 sonarqube:community
           echo "Aguardando SonarQube iniciar..."
           for i in {1..60}; do
             echo "Resposta do /api/server/version:";
@@ -64,7 +64,8 @@ jobs:
           docker run --rm \
             --network sonar-net \
             -e SONAR_HOST_URL="http://sonar:9000" \
-            -e SONAR_LOGIN="${{ secrets.SONAR_TOKEN }}" \
+            -e SONAR_LOGIN="admin" \
+            -e SONAR_PASSWORD="admin" \
             -v ${{ github.workspace }}:/usr/src \
             sonarsource/sonar-scanner-cli
 
