@@ -70,23 +70,58 @@ jobs:
         docker stop sonar
         docker rm sonar
 
-    - name: Acessar servidor remoto, copiar código e rodar Deploy com Docker Compose
+    - name: Copiar código para o servidor remoto
+      uses: appleboy/scp-action@v0.1.4
+      with:
+        host: 201.23.3.86
+        username: aluno
+        key: ${{ secrets.SSH_PRIVATE_KEY }}
+        source: ./*
+        target: ~/TrabalhoVolo
+
+    - name: Acessar servidor remoto e rodar Deploy com Docker Run
       uses: appleboy/ssh-action@v0.1.10
       with:
         host: 201.23.3.86
         username: aluno
         key: ${{ secrets.SSH_PRIVATE_KEY }}
         script: |
-          # Cria pasta do projeto se não existir
-          mkdir -p ~/TrabalhoVolo
-          # Remove código antigo
-          rm -rf ~/TrabalhoVolo/*
-          # Copia o código do repositório para o servidor remoto
-          scp -r * aluno@201.23.3.86:~/TrabalhoVolo/
-          cd ~/TrabalhoVolo
-          echo "Parando containers antigos..."
-          docker-compose down || true
-          echo "Subindo app e banco com Docker Compose..."
-          docker-compose up -d --build
+          APP_IMAGE="gabrielfillip/deploy-app:latest"
+          DB_IMAGE="mysql:8"
+          NETWORK_NAME="trabalho-volo-net"
+          DB_CONTAINER="trabalho-mysql"
+          APP_CONTAINER="trabalho-app"
+
+          # Cria rede se não existir
+          docker network create $NETWORK_NAME || true
+
+          # Remove containers antigos
+          docker stop $APP_CONTAINER || true && docker rm $APP_CONTAINER || true
+          docker stop $DB_CONTAINER || true && docker rm $DB_CONTAINER || true
+
+          # Sobe o banco
+          docker run -d --name $DB_CONTAINER --network $NETWORK_NAME --restart always \
+            -e MYSQL_DATABASE=trabalho \
+            -e MYSQL_USER=appuser \
+            -e MYSQL_PASSWORD=appsenha \
+            -e MYSQL_ROOT_PASSWORD=root \
+            -p 8111:3306 \
+            mysql:8
+
+          echo "Aguardando o banco iniciar..."
+          sleep 20
+
+          # Sobe o app
+          docker pull $APP_IMAGE
+          docker run -d --name $APP_CONTAINER --network $NETWORK_NAME --restart always \
+            -e DB_NAME=trabalho \
+            -e DB_USER=appuser \
+            -e DB_PASSWORD=appsenha \
+            -e DB_HOST=$DB_CONTAINER \
+            -e DB_PORT=3306 \
+            -e PORT=8112 \
+            -p 8112:8112 \
+            $APP_IMAGE
+
           echo "Containers em execução:"
           docker ps
